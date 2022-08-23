@@ -11,6 +11,15 @@
 # Student side autograding was added by Brad Miller, Nick Hay, and
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
+###############################################
+##               Assignment 0                ##
+##                                           ##
+##  Secondary Author Name: Srajan chourasia  ##
+##  Roll No.: 2003135                        ##
+##  Branch: CSE                              ##
+##  Date: 23/08/2022                         ##
+###############################################
+
 
 """
 To run this script, type
@@ -38,7 +47,7 @@ def buyLotsOfFruit(orderList):
     for fruit, numPounds in orderList:
         if fruit not in fruitPrices:
             return None
-        total += fruitPrices[fruit]*numPounds 
+        totalCost += fruitPrices[fruit]*numPounds 
     return totalCost
 
 
