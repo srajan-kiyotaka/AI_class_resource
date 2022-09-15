@@ -12,6 +12,26 @@
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
 
+##############################################
+##                   Lab 1                  ##
+##                                          ##
+##    Secondary Authors: Team               ##
+##                                          ##
+##    Member 1:                             ##
+##       Name: Srajan chourasia             ##
+##       Roll No.: 2003135                  ##
+##                                          ##
+##    Member 2:                             ## 
+##       Name: Shivam                       ##
+##       Roll No.: 2003132                  ##
+##                                          ##
+##    Branch: CSE                           ##
+##                                          ##
+##    Date: 09/09/2022                      ##
+##                                          ##
+##############################################
+
+
 """
 In search.py, you will implement generic search algorithms which are called by
 Pacman agents (in searchAgents.py).
@@ -87,10 +107,11 @@ def depthFirstSearch(problem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
+
     # initialize an empty stack
     stack = util.Stack()
 
-    # initilize an empty visited array
+    # initialize an empty visited array
     visited = list()
     
     # initial_state is a tuple containing the start state coordinates and the sequence of 
@@ -101,12 +122,12 @@ def depthFirstSearch(problem):
     # push the initial state in the stack
     stack.push(initial_state)
 
-    # iterate over all the elements present in the stack untill you reach the goal state
+    # iterate over all the elements present in the stack until you reach the goal state
     # or the stack become empty.
     while(not stack.isEmpty()):
 
         # pop the element from the stack, and do tuple unpacking to get the current 
-        # state coordinates and the list of actions to reach the current state.
+        # state coordinates and the list of actions required to reach the current state.
         current_state, path_action = stack.pop()
 
         # if the current state is the goal state then return the list of actions
@@ -114,86 +135,134 @@ def depthFirstSearch(problem):
             return path_action
 
         # if the current goal is already visited then we will not push this state in the 
-        # stack.
+        # stack and continue.
         if(current_state in visited):
             continue
         
         # add the states as a visited state.
         visited.append(current_state)
         
-        # iterate over all it's neighbours and push those states in the stack.
+        # iterate over all it's neighbors and push those states in the stack.
         for next_state, action, cost in problem.getSuccessors(current_state):
 
             # if the state is not already visited. 
             if(next_state not in visited):
 
-                # 
+                # add the action taken to reach the current state from the previous state
+                # in the list of actions which contains the actions to reach the previous
+                # state from the start state.
                 next_path_action = path_action + [action]
 
+                # Push the tuple in the stack. The tuple contains the coordinates of the 
+                # next stage and the list of actions required to reach that stage.
                 stack.push(tuple([next_state, next_path_action]))
-        
-    # return []
+
     util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     
+    # initialize an empty queue
     queue = util.Queue()
 
+    # initialize an empty visited array
     visited = list()
     
+    # initial_state is a tuple containing the start state coordinates and the sequence of 
+    # actions taken till now to reach this state.
+    # initially the list of action will be empty as it remains empty.
     initial_state = (problem.getStartState(), [])
 
+    # push the initial state in the queue
     queue.push(initial_state)
 
+    # iterate over all the elements present in the queue until you reach the goal state
+    # or the queue become empty.
     while(not queue.isEmpty()):
+        
+        # pop the element from the queue, and do tuple unpacking to get the current 
+        # state coordinates and the list of actions required to reach the current state.
         current_state, path_action = queue.pop()
 
+        # if the current state is the goal state then return the list of actions.
         if(problem.isGoalState(current_state)):
             return path_action
 
+        # if the current goal is already visited then we will not push this state in the 
+        # queue and continue.
         if(current_state in visited):
             continue
         
+        # add the states as a visited state.
         visited.append(current_state)
         
+        # iterate over all it's neighbors and push those states in the queue.
         for next_state, action, cost in problem.getSuccessors(current_state):
             
+            # if the state is not already visited. 
             if(next_state not in visited):
+            
+                # add the action taken to reach the current state from the previous state
+                # in the list of actions which contains the actions to reach the previous
+                # state from the start state.
                 next_path_action = path_action + [action]
 
+                # Push the tuple in the stack. The tuple contains the coordinates of the 
+                # next stage and the list of actions required to reach that stage.
                 queue.push(tuple([next_state, next_path_action]))
         
-    # return []
     util.raiseNotDefined()
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     
+    # initialize an empty priority queue
     priority_queue = util.PriorityQueue()
 
+    # initialize an empty visited array
     visited = list()
 
+    # initial_state is a tuple containing the start state coordinates, the sequence of 
+    # actions taken till now to reach this state and the cost to reach that state from
+    # the start state. initially the list of action will be empty as it remains empty.
+    # and the initial cost will also be 0.
     initial_state = (problem.getStartState(), [], 0)
 
+    # push the initial state in the queue
     priority_queue.push(initial_state, 0)
 
+    # iterate over all the elements present in the queue until you reach the goal state
+    # or the queue become empty.
     while(not priority_queue.isEmpty()):
 
+        # pop the element from the queue, and do tuple unpacking to get the current 
+        # state coordinates, the list of actions required to reach the current state and 
+        # total cost required to reach.
         current_state, action_path, total_cost = priority_queue.pop()
 
+        # if the current state is the goal state then return the list of actions.
         if(problem.isGoalState(current_state)):
             return action_path
 
+        # if the state is not already visited. 
         if(current_state in visited):
             continue
 
+        # add the states as a visited state.
         visited.append(current_state)
 
+        # iterate over all it's neighbors and push those states in the queue.
         for next_state, action, cost in problem.getSuccessors(current_state):
-            
+
+            # add the action taken to reach the current state from the previous state
+            # in the list of actions which contains the actions to reach the previous
+            # state from the start state.
             next_path_action = action_path + [action]
 
+            # Push the tuple in the stack. The tuple contains the coordinates of the 
+            # next stage, the list of actions required to reach that stage and the total
+            # cost required to reach. The priority will be the cost and the if the element
+            # already present then update it's key value.
             priority_queue.update(tuple([next_state, next_path_action, cost + total_cost]), cost + total_cost)
 
     util.raiseNotDefined()
@@ -208,34 +277,59 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic = nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     
+    # initialize an empty priority queue
     priority_queue = util.PriorityQueue()
 
+    # initialize an empty visited array
     visited = list()
 
+    # get the start state.
     start_state = problem.getStartState()
 
+    #  initial_state is a tuple containing the start state coordinates, the sequence of 
+    # actions taken till now to reach this state and the cost to reach that state from
+    # the start state. initially the list of action will be empty as it remains empty.
+    # and the initial cost will also be 0.
     initial_state = (start_state, [], 0)
 
+    # push the initial state in the queue
     priority_queue.push(initial_state, heuristic(start_state, problem))
 
+    # iterate over all the elements present in the queue until you reach the goal state
+    # or the queue become empty.
     while(not priority_queue.isEmpty()):
-
+        
+        # pop the element from the queue, and do tuple unpacking to get the current 
+        # state coordinates, the list of actions required to reach the current state and 
+        # total cost required to reach.
         current_state, action_path, total_cost = priority_queue.pop()
 
+        # if the current state is the goal state then return the list of actions.
         if(problem.isGoalState(current_state)):
             return action_path
 
+        # if the state is not already visited. 
         if(current_state in visited):
             continue
 
+        # add the states as a visited state.
         visited.append(current_state)
 
+        # iterate over all it's neighbors and push those states in the queue.
         for next_state, action, cost in problem.getSuccessors(current_state):
-            
+
+            # add the action taken to reach the current state from the previous state
+            # in the list of actions which contains the actions to reach the previous
+            # state from the start state.
             next_path_action = action_path + [action]
 
+            # calculate the estimated cost using the heuristic cost and the total cost.
             f_state = cost + total_cost + heuristic(next_state, problem)
 
+            # Push the tuple in the stack. The tuple contains the coordinates of the 
+            # next stage, the list of actions required to reach that stage and the total
+            # cost required to reach. The priority will be the estimated cost and the if 
+            # the element already present then update it's key value.
             priority_queue.update(
                 tuple([next_state, next_path_action, cost + total_cost]), f_state)
 

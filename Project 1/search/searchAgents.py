@@ -12,6 +12,26 @@
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
 
+##############################################
+##                   Lab 1                  ##
+##                                          ##
+##    Secondary Authors: Team               ##
+##                                          ##
+##    Member 1:                             ##
+##       Name: Srajan chourasia             ##
+##       Roll No.: 2003135                  ##
+##                                          ##
+##    Member 2:                             ## 
+##       Name: Shivam                       ##
+##       Roll No.: 2003132                  ##
+##                                          ##
+##    Branch: CSE                           ##
+##                                          ##
+##    Date: 09/09/2022                      ##
+##                                          ##
+##############################################
+
+
 """
 This file contains all of the agents that can be selected to control Pacman.  To
 select an agent, use the '-p' option when running pacman.py.  Arguments can be
@@ -288,22 +308,57 @@ class CornersProblem(search.SearchProblem):
         self._expanded = 0 # DO NOT CHANGE; Number of search nodes expanded
         # Please add any code here which you would like to use
         # in initializing the problem
-        "*** YOUR CODE HERE ***"
+        
+        # create a visited empty dictionary
+        self.visited = {}
+
+        # create a cornerVisited empty list
+        self.cornersVisited = []
+
+        # get all the corners from the corner list.
+        for corner in self.corners:
+
+            # if the starting position is equal to the corner position
+            if self.startingPosition == corner:
+                
+                # make this corner as visited
+                self.cornersVisited.append((corner, True))
+            else:
+                # else make the corner not visited
+                self.cornersVisited.append((corner, False))
+
+        # convert the cornerVisited list into a tuple. To make it immutable.
+        self.cornersVisited = tuple(self.cornersVisited)
+
 
     def getStartState(self):
         """
         Returns the start state (in your state space, not the full Pacman state
         space)
         """
-        "*** YOUR CODE HERE ***"
+
+        # return a tuple which contains starting position and the tuple of corner 
+        # visited information.
+        return self.startingPosition, self.cornersVisited
+        
         util.raiseNotDefined()
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
-        "*** YOUR CODE HERE ***"
-        print(state)
+        
+        # iterate over all the corners. 
+        for corner in state[1]:
+
+            # get the status of the corner visited or not.
+            cornerVisited = corner[1]
+            
+            # if not return false
+            if cornerVisited is False:
+                return False
+        
+        return True
         # util.raiseNotDefined()
 
     def getSuccessors(self, state):
@@ -325,7 +380,7 @@ class CornersProblem(search.SearchProblem):
             #   nextx, nexty = int(x + dx), int(y + dy)
             #   hitsWall = self.walls[nextx][nexty]
             
-            ## my code ##
+            ## my code reference ##
             # successors = []
             # for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
             #     x,y = state
@@ -336,19 +391,46 @@ class CornersProblem(search.SearchProblem):
             #         cost = self.costFn(nextState)
             #         successors.append( ( nextState, action, cost) )
             
-            
-            currentPosition, foodStatus = state
-            x, y = currentPosition
-            dx, dy = Actions.directionToVector(action)
-            nextx, nexty = int(x + dx), int(y + dy)
-            nextPosition = (nextx, nexty)
-            if not self.walls[nextx][nexty]:
-                nextFoodStatus = list(foodStatus).copy()
-                if nextPosition in self.corners and nextPosition in nextFoodStatus:
-                    nextFoodStatus.remove(nextPosition)
+            # get the state coordinates.
+            x, y = state[0]
 
-                cost = self.costFn(nextPosition)
-                successors.append(((nextPosition, tuple(nextFoodStatus)), action, cost))
+            # get the status of the corner state
+            cornerState = state[1]
+
+            # make a new corner state information list
+            newCornerStateList = []
+
+            # get the direction vector for a particular vector
+            dx, dy = Actions.directionToVector(action)
+
+            # get the next state coordinates.
+            nextx, nexty = int(x + dx), int(y + dy)
+            
+            # make a tuple of the new coordinates.
+            nextPosition = (nextx, nexty)
+
+            # get the information of the walls for the new state.
+            Walls = self.walls[nextx][nexty]
+
+            if Walls == False:
+                
+                # iterate over all the corners.
+                for corner in cornerState:
+
+                    # get the coordinates of the corner.
+                    cornerPosition = corner[0]
+
+                    # if the new state is the corner
+                    if nextPosition == cornerPosition:
+                        newCornerStateList.append((cornerPosition, True))
+                    else:
+                        newCornerStateList.append((cornerPosition, corner[1]))
+
+                # convert the list into a immutable tuple
+                newCornerStateList = tuple(newCornerStateList)
+
+                # add this updated information in the successors.
+                successors.append(((nextPosition, newCornerStateList), action, 1))
 
 
 
@@ -385,8 +467,29 @@ def cornersHeuristic(state, problem):
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
-    "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    # get the status of the state
+    cornerState = state[1]
+
+    # we will use the manhattan distance as the heuristic.
+    # initially the manhattan distance be zero.
+    manhattanDistance = 0
+
+    # iterates over all the corner state.
+    for corner in cornerState:
+        
+        # get the state coordinates.
+        position = state[0]
+
+        # get the corner coordinates.
+        cornerPosition = corner[0]
+
+        # if the corner is not yet visited then calculate it's manhattan distance.
+        if corner[1] is False:
+            manhattanDistance = max(manhattanDistance, (abs(position[0] - cornerPosition[0])
+                                     + abs(position[1] - cornerPosition[1])))
+    
+    # return the manhattan distance as a heuristic.
+    return manhattanDistance
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -479,8 +582,26 @@ def foodHeuristic(state, problem):
     problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
-    "*** YOUR CODE HERE ***"
-    return 0
+    
+    # convert the food grid to list type.
+    foodPositionList = foodGrid.asList()
+
+    # make a list of length foodPositionList and initialise it with zero.
+    foodCost = [0]*len(foodPositionList)
+    
+    # if the length is zero return zero.
+    if(len(foodPositionList) == 0):
+        return 0
+    
+    # iterate over all the food palets position. 
+    for i in range(len(foodPositionList)):
+
+        # add the cost of reaching to that food palets.
+        foodCost[i] = mazeDistance(position, foodPositionList[i], problem.startingGameState)
+
+    # now return the maximum cost. to make the heuristic more consistent.             
+    maximumCost = max(foodCost)
+    return maximumCost
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -510,7 +631,13 @@ class ClosestDotSearchAgent(SearchAgent):
         walls = gameState.getWalls()
         problem = AnyFoodSearchProblem(gameState)
 
-        "*** YOUR CODE HERE ***"
+        # get the action list which contains the actions required to reach the nearest
+        # food palets. For this I have used BFS since it more efficient to use BFS the
+        # using the DFS as in most of the cases the food palet will be near the pacman.    
+        actionList = search.bfs(problem)
+        
+        return actionList
+        
         util.raiseNotDefined()
 
 class AnyFoodSearchProblem(PositionSearchProblem):
@@ -546,7 +673,20 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         """
         x,y = state
 
-        "*** YOUR CODE HERE ***"
+        # get the list of food coordinates of the remaining food palets.
+        foodList = self.food.asList()
+
+        # get the distance and the coordinates of the closet food palets using list 
+        # comprehension to generate the manhattan distance of all the food palets
+        # available or left.    
+        distance, food = min([(util.manhattanDistance(state, food), food) for food in foodList])
+
+        # check if the current state have the food palets. 
+        if(state == food):
+            return True
+
+        return False
+
         util.raiseNotDefined()
 
 def mazeDistance(point1, point2, gameState):
