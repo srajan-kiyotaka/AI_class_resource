@@ -432,8 +432,6 @@ class CornersProblem(search.SearchProblem):
                 # add this updated information in the successors.
                 successors.append(((nextPosition, newCornerStateList), action, 1))
 
-
-
         self._expanded += 1 # DO NOT CHANGE
         return successors
 
