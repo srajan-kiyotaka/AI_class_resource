@@ -178,7 +178,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
         gameState.isLose():
         Returns whether or not the game state is a losing state
         """
-        "*** YOUR CODE HERE ***"
+        ## "*** YOUR CODE HERE ***" ##
 
         # set the max state value to be the lowest possible value, i.e. 
         # -infinity initially. We will store the maximum state value.
@@ -250,7 +250,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Calculate and return the Min State Value.
         """
 
-        # set the minimum state value as -infinity initially.
+        # set the minimum state value as +infinity initially.
         # Which will store the minimum state value.
         minStateValue = float("inf")
 
@@ -279,9 +279,135 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     def getAction(self, gameState):
         """
         Returns the minimax action using self.depth and self.evaluationFunction
+        and using alpha-beta pruning. 
         """
-        "*** YOUR CODE HERE ***"
+        ## "*** YOUR CODE HERE ***" ##
+
+        # set the max state value to be the lowest possible value, i.e. 
+        # -infinity initially. We will store the maximum state value.
+        maxStateValue = float("-inf")
+
+        # alpha is the Maximum best option on the path to the root.
+        # initially set it to the lowest possible value i.e. - infinity.
+        alpha = float("-inf")
+        
+        # alpha is the Minimum best option on the path to the root.
+        # initially set it to the highest possible value i.e. + infinity.
+        beta = float("inf")
+        
+        # We will store the action for the max state.
+        maxStateActions = Directions.STOP
+        
+        # iterate over all possible action and get the state value and actions
+        # to reach that state for each possible action from the current state.
+        for action in gameState.getLegalActions(0):
+
+            # get the new state after taking action Ai.
+            nextState = gameState.generateSuccessor(0, action)
+            
+            # We will use the get value function to calculate the next state value.
+            nextValue = self.getStateValue(nextState, 0, 1, alpha, beta)
+
+            # if this states value is greater then the current max state value then
+            # update the maxStateValue and maxStateActions.
+            if nextValue > maxStateValue:
+                maxStateValue = nextValue
+                maxStateActions = action
+            
+            # update the alpha value with the max of alpha and maxStateValue.
+            alpha = max(alpha, maxStateValue)
+        
+        return maxStateActions
+
         util.raiseNotDefined()
+
+
+    def getStateValue(self, gameState, currentDepth, agentIndex, alpha, beta):
+        """
+        Returns the state value using alpha-beta pruning.
+        """
+
+        # Check for the terminal state. if this is the terminal state then
+        # return the evaluation value of that state.
+        if currentDepth == self.depth or gameState.isWin() or gameState.isLose():
+            return self.evaluationFunction(gameState)
+        
+        # If this state action is to be taken from the 'Max Agent'.
+        # Then calculate and return the Max State value.
+        elif agentIndex == 0:
+            return self.getMaxStateValue(gameState,currentDepth,alpha,beta)
+
+        # If this state action is to be taken from the 'Min Agent'. 
+        # Then calculate and return the Min State value. 
+        else:
+            return self.getMinStateValue(gameState,currentDepth,agentIndex,alpha,beta)
+
+
+    def getMaxStateValue(self, gameState, currentDepth, alpha, beta):
+        """
+        Calculate and return the Max State Value using alpha-beta pruning.
+        """
+        # set the maximum state value as -infinity initially.
+        # Which will store the maximum state value.
+        maxStateValue = float("-inf")
+
+        # iterate over all possible action and get the state value and actions
+        # to reach that state for each possible action from the current state.
+        for action in gameState.getLegalActions(0):
+
+            # store the maximum state value and pass the next state value with
+            # making the next state agent as 'Min Agent'. 
+            maxStateValue = max(maxStateValue,
+             self.getStateValue(gameState.generateSuccessor(0, action), currentDepth, 1, alpha, beta))
+            
+            # Check if the max state value is more then beta then no need to
+            # check further actions and return the max state value, in this way 
+            # we skip other action state whose calculation is not necessary.
+            # This is known as alpha beta pruning.
+            if maxStateValue > beta:
+                return maxStateValue
+
+            # update the alpha value with the max of alpha and maxStateValue.
+            alpha = max(alpha, maxStateValue)
+
+        return maxStateValue
+
+
+    def getMinStateValue(self, gameState, currentDepth, agentIndex, alpha, beta):
+        """
+        Calculate and return the Min State Value using alpha-beta pruning.
+        """
+
+        # set the minimum state value as +infinity initially.
+        # Which will store the minimum state value.
+        minStateValue = float("inf")
+
+        # iterate over all possible action and get the state value and actions
+        # to reach that state for each possible action from the current state.
+        for action in gameState.getLegalActions(agentIndex):
+
+            # first go through all the 'Min Agent' by increasing the depth of the tree, then
+            # if we have gone through all the 'Min Agents' state then go to the next level 
+            # of the state for the 'Max Agent'. 
+            if agentIndex == gameState.getNumAgents() - 1:
+                minStateValue = min(minStateValue, 
+                self.getStateValue(gameState.generateSuccessor(agentIndex, action), currentDepth+1, 0, alpha, beta))
+            else:
+                minStateValue = min(minStateValue, 
+                self.getStateValue(gameState.generateSuccessor(agentIndex, action), currentDepth, agentIndex+1, alpha, beta))
+            
+            # Check if the min state value is less then alpha then no need to
+            # check further actions and return the min state value, in this way 
+            # we skip other action state whose calculation is not necessary.
+            # This is known as alpha beta pruning.
+            if minStateValue < alpha:
+                return minStateValue
+
+            # update the beta value with the min of beta and minStateValue.
+            beta = min(beta, minStateValue)
+        
+        return minStateValue
+
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
