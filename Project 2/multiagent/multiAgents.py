@@ -185,6 +185,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
         maxStateValue = float("-inf")
 
         # We will store the action for the max state.
+        # we initially make the action as Direction.STOP which means stop.
         maxStateActions = Directions.STOP
 
         # iterate over all possible action and get the state value and actions
@@ -235,8 +236,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
         # Which will store the maximum state value.
         maxStateValue = float("-inf")
 
-        # iterate over all possible action and get the state value and actions
-        # to reach that state for each possible action from the current state.
+        # iterate over all possible action and get the maximum state value to
+        # reach that state for each possible action from the current state.
         for action in gameState.getLegalActions(0):
             
             # store the maximum state value and pass the next state value with
@@ -254,13 +255,14 @@ class MinimaxAgent(MultiAgentSearchAgent):
         # Which will store the minimum state value.
         minStateValue = float("inf")
 
-        # iterate over all possible action and get the state value and actions
-        # to reach that state for each possible action from the current state.  
+        # iterate over all possible action and get the minimum state value to
+        # reach that state for each possible action from the current state.  
         for action in gameState.getLegalActions(agentIndex):
             
-            # first go through all the 'Min Agent' by increasing the depth of the tree, then
-            # if we have gone through all the 'Min Agents' state then go to the next level 
-            # of the state for the 'Max Agent'.   
+            # first go through all the 'Min Agent' by keeping the depth of the 
+            # tree constant, then if we have gone through all the 'Min Agents' 
+            # state then go to the next level of the state for the 'Max Agent' 
+            # and increase the depth of the tree.  
             if agentIndex == gameState.getNumAgents() - 1:
                 minStateValue = min(minStateValue, 
                 self.getStateValue(gameState.generateSuccessor(agentIndex, action), currentDepth + 1, 0))
@@ -296,6 +298,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         beta = float("inf")
         
         # We will store the action for the max state.
+        # we initially make the action as Direction.STOP which means stop.
         maxStateActions = Directions.STOP
         
         # iterate over all possible action and get the state value and actions
@@ -351,8 +354,8 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         # Which will store the maximum state value.
         maxStateValue = float("-inf")
 
-        # iterate over all possible action and get the state value and actions
-        # to reach that state for each possible action from the current state.
+        # iterate over all possible action and get the maximum state value to
+        # reach that state for each possible action from the current state.
         for action in gameState.getLegalActions(0):
 
             # store the maximum state value and pass the next state value with
@@ -382,13 +385,14 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         # Which will store the minimum state value.
         minStateValue = float("inf")
 
-        # iterate over all possible action and get the state value and actions
-        # to reach that state for each possible action from the current state.
+        # iterate over all possible action and get the minimum state value to
+        # reach that state for each possible action from the current state.
         for action in gameState.getLegalActions(agentIndex):
 
-            # first go through all the 'Min Agent' by increasing the depth of the tree, then
-            # if we have gone through all the 'Min Agents' state then go to the next level 
-            # of the state for the 'Max Agent'. 
+            # first go through all the 'Min Agent' by keeping the depth of the 
+            # tree constant, then if we have gone through all the 'Min Agents' 
+            # state then go to the next level of the state for the 'Max Agent' 
+            # and increase the depth of the tree.  
             if agentIndex == gameState.getNumAgents() - 1:
                 minStateValue = min(minStateValue, 
                 self.getStateValue(gameState.generateSuccessor(agentIndex, action), currentDepth+1, 0, alpha, beta))
@@ -421,8 +425,106 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         All ghosts should be modeled as choosing uniformly at random from their
         legal moves.
         """
-        "*** YOUR CODE HERE ***"
+        ## "*** YOUR CODE HERE ***" ##
+
+        # set the max state value to be the lowest possible value, i.e. 
+        # -infinity initially. We will store the maximum state value.
+        maxStateValue = float("-inf")
+
+        # We will store the action for the max state.
+        # we initially make the action as Direction.STOP which means stop.
+        maxStateActions = Directions.STOP
+
+        # iterate over all possible action and get the state value and actions
+        # to reach that state for each possible action from the current state.  
+        for action in gameState.getLegalActions(0):
+            
+            # get the new state after taking action Ai.
+            nextState = gameState.generateSuccessor(0, action)
+            
+            # We will use the get value function to calculate the next state value.
+            nextValue = self.getStateValue(nextState, 0, 1)
+
+            # if this states value is greater then the current max state value then
+            # update the maxStateValue and maxStateActions. 
+            if nextValue > maxStateValue:
+                maxStateValue = nextValue
+                maxStateActions = action
+        
+        return maxStateActions
+
         util.raiseNotDefined()
+
+    def getStateValue(self, gameState, currentDepth, agentIndex):
+        """
+        Returns the state value.
+        """
+        # Check for the terminal state. if this is the terminal state then
+        # return the evaluation value of that state.
+        if currentDepth == self.depth or gameState.isWin() or gameState.isLose():
+            return self.evaluationFunction(gameState)
+
+        # If this state action is to be taken from the 'Max Agent'.
+        # Then calculate and return the Max State value. 
+        elif agentIndex == 0:
+            return self.getMaxStateValue(gameState,currentDepth)
+
+        # If this state action is to be taken from the 'Min Agent'. 
+        # Then calculate and return the Min State value. 
+        else:
+            return self.getAvgStateValue(gameState,currentDepth,agentIndex)
+
+
+    def getMaxStateValue(self, gameState, currentDepth):
+        """
+        Calculate and return the Max State Value.
+        """
+
+        # set the maximum state value as -infinity initially.
+        # Which will store the maximum state value.
+        maxStateValue = float("-inf")
+
+        # iterate over all possible action and get the maximum state value to
+        # reach that state for each possible action from the current state.
+        for action in gameState.getLegalActions(0):
+            
+            # store the maximum state value and pass the next state value with
+            # making the next state agent as 'Min Agent'. 
+            maxStateValue = max(maxStateValue,
+            self.getStateValue(gameState.generateSuccessor(0, action), currentDepth, 1))
+        
+        return maxStateValue
+
+    def getAvgStateValue(self, gameState, currentDepth, agentIndex):
+        """
+        Calculate and return the Average State Value.
+        """
+
+        # Here we will not calculate the minimum value of the state instead,
+        # we will calculate the average value of the state and store that value
+        # in the avgStateValue variable.
+        avgStateValue = 0
+
+        # iterate over all possible action and add all the state values to get 
+        # the Average state value for each possible action from the current 
+        # state. We are adding because the terminal state values from any state
+        # will be either positive or negative, so when we add these values then
+        # we are getting a kind of average value for that state. 
+        for action in gameState.getLegalActions(agentIndex):
+
+            # first go through all the 'Min Agent' by keeping the depth of the 
+            # tree constant, then if we have gone through all the 'Min Agents' 
+            # state then go to the next level of the state for the 'Max Agent' 
+            # and increase the depth of the tree.  
+            if agentIndex == gameState.getNumAgents() - 1:
+                avgStateValue = avgStateValue + self.getStateValue(
+                    gameState.generateSuccessor(agentIndex, action), currentDepth + 1, 0)
+            else:
+                avgStateValue = avgStateValue + self.getStateValue(
+                    gameState.generateSuccessor(agentIndex, action), currentDepth, agentIndex + 1)
+        
+        return avgStateValue
+
 
 def betterEvaluationFunction(currentGameState):
     """
