@@ -12,10 +12,29 @@
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
 
+##############################################
+##                   Lab 2                  ##
+##                                          ##
+##    Secondary Authors: Team               ##
+##                                          ##
+##    Member 1:                             ##
+##       Name: Srajan chourasia             ##
+##       Roll No.: 2003135                  ##
+##                                          ##
+##    Member 2:                             ## 
+##       Name: Shivam                       ##
+##       Roll No.: 2003132                  ##
+##                                          ##
+##    Branch: CSE                           ##
+##                                          ##
+##    Date: 28/09/2022                      ##
+##                                          ##
+##############################################
+
+
 from util import manhattanDistance
 from game import Directions
 import random, util
-
 from game import Agent
 
 class ReflexAgent(Agent):
@@ -27,7 +46,6 @@ class ReflexAgent(Agent):
     it in any way you see fit, so long as you don't touch our method
     headers.
     """
-
 
     def getAction(self, gameState):
         """
@@ -51,6 +69,7 @@ class ReflexAgent(Agent):
 
         return legalMoves[chosenIndex]
 
+
     def evaluationFunction(self, currentGameState, action):
         """
         Design a better evaluation function here.
@@ -73,52 +92,62 @@ class ReflexAgent(Agent):
         newGhostStates = successorGameState.getGhostStates()
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
-        "*** YOUR CODE HERE ***"
-        # Get the status of the game, i.e. whether the pacman win the game or not
+        ## "*** YOUR CODE HERE ***" ##
+        
+        # Get the status of the game, i.e. whether the pacman win the game or not.
         # if the pacman wins the game return the highest number possible, i.e.
-        # + infinity.(because the higher numbers are better.)
+        # + infinity.(because the higher numbers are better state value.)
         if successorGameState.isWin():
             return float("inf")
+
+        # Get the status of the game, i.e. whether the pacman win the game or not.
+        # if the pacman lose the game return the lowest number possible, i.e.
+        # - infinity.(because the lower numbers are worst state value.)
+        if successorGameState.isLose():
+            return float("-inf")    
 
         # newGhostStates contains the new status information about the ghosts, 
         # after the specified pacman move. We iterate over each ghost and calculates
         # the manhattan distance between the pacman and the ghost and if the ghost 
         # is very near the pacman then return the lowest value possible i.e. -infinity. 
         for ghostState in newGhostStates:
-            if util.manhattanDistance(ghostState.getPosition(), newPos) < 3:
+            if util.manhattanDistance(ghostState.getPosition(), newPos) <= 2:
                 return float("-inf")
 
-        # a list to store the manhattan distance between the food pallet and the pacman.
-        foodDistanceList = []
+        # a variable to store the minimum manhattan distance between the food pallet 
+        # and the pacman. To get the manhattan distance of the nearest food pallet.
+        nearestFoodDistance = 1000
 
-        # iterate over each food palets after the specified pacman move(new state of the
-        # food palets), and store the manhattan distance between the food pallet and the
-        # new pacman position. 
+        # iterate over each food palets after the specified pacman move(new state of 
+        # the food palets), and store the minimum value between the current minimum 
+        # manhattan value and the manhattan distance between the food pallet and the
+        # new pacman position. To get the manhattan distance of the nearest food pallet.
         for food in list(newFood.asList()):
-            foodDistanceList.append(util.manhattanDistance(food, newPos))
+            nearestFoodDistance = min(nearestFoodDistance, util.manhattanDistance(food, newPos))
 
-        # a variable to store the point of evaluation of the food status after the
+        # a variable to store the points of evaluation of the food status after the
         # specified pacman move(new state of the food palets).
-        foodSuccessor = 0
+        foodPalletStatus = 0
 
         # evaluation method: `if the total number of food pallets get reduces from the 
         # current state to the next state after the specified pacman move, then make the
-        # foodSuccessor value to be + 400, but if there is no change then make the 
-        # foodSuccessor equal to -25.`
+        # foodPalletStatus value to be + 500, but if there is no change then make the 
+        # foodPalletStatus equal to -150.`
         if (currentGameState.getNumFood() > successorGameState.getNumFood()):
-            foodSuccessor = 400
+            foodPalletStatus = 500
         else:
-            foodSuccessor = -25
-
+            foodPalletStatus = -150
+        
         ## These are some of the Evaluation Functions We tried ## 
-        # return successorGameState.getScore() - 5 * min(foodDistanceList) + foodSuccessor
-        # return successorGameState.getScore() + foodSuccessor - 4 * min(foodDistanceList)
-        # return successorGameState.getScore() - foodSuccessor - 4 * min(foodDistanceList)
-        # return successorGameState.getScore() + foodSuccessor - max(foodDistanceList)
-        # return successorGameState.getScore() + foodSuccessor - (1/4) * max(foodDistanceList)
-        # return successorGameState.getScore() + foodSuccessor - 4 * min(foodDistanceList)
+        # return successorGameState.getScore() - 5 * nearestFoodDistance + foodPalletStatus
+        # return successorGameState.getScore() + foodPalletStatus - 4 * nearestFoodDistance
+        # return successorGameState.getScore() - foodPalletStatus - 4 * nearestFoodDistance
+        # return successorGameState.getScore() + foodPalletStatus - nearestFoodDistance
+        # return successorGameState.getScore() + foodPalletStatus - (1/4) * nearestFoodDistance
+        # return successorGameState.getScore() + foodPalletStatus - 4 * nearestFoodDistance
         ## Finally We get the reasonable good performance using this Evaluation Function! ##
-        return successorGameState.getScore() + foodSuccessor - 5 * min(foodDistanceList)
+        return successorGameState.getScore() + foodPalletStatus - 2.5 * nearestFoodDistance
+
 
 def scoreEvaluationFunction(currentGameState):
     """
@@ -129,6 +158,7 @@ def scoreEvaluationFunction(currentGameState):
     (not reflex agents).
     """
     return currentGameState.getScore()
+
 
 class MultiAgentSearchAgent(Agent):
     """
@@ -149,6 +179,7 @@ class MultiAgentSearchAgent(Agent):
         self.index = 0 # Pacman is always agent index 0
         self.evaluationFunction = util.lookup(evalFn, globals())
         self.depth = int(depth)
+
 
 class MinimaxAgent(MultiAgentSearchAgent):
     """
@@ -178,6 +209,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
         gameState.isLose():
         Returns whether or not the game state is a losing state
         """
+
         ## "*** YOUR CODE HERE ***" ##
 
         # set the max state value to be the lowest possible value, i.e. 
@@ -208,10 +240,12 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         util.raiseNotDefined()
 
+
     def getStateValue(self, gameState, currentDepth, agentIndex):
         """
         Returns the state value.
         """
+        
         # Check for the terminal state. if this is the terminal state then
         # return the evaluation value of that state.
         if currentDepth == self.depth or gameState.isWin() or gameState.isLose():
@@ -220,12 +254,13 @@ class MinimaxAgent(MultiAgentSearchAgent):
         # If this state action is to be taken from the 'Max Agent'.
         # Then calculate and return the Max State value. 
         elif agentIndex == 0:
-            return self.getMaxStateValue(gameState,currentDepth)
+            return self.getMaxStateValue(gameState, currentDepth)
 
         # If this state action is to be taken from the 'Min Agent'. 
         # Then calculate and return the Min State value. 
         else:
-            return self.getMinStateValue(gameState,currentDepth,agentIndex)
+            return self.getMinStateValue(gameState, currentDepth, agentIndex)
+
 
     def getMaxStateValue(self, gameState, currentDepth):
         """
@@ -242,9 +277,11 @@ class MinimaxAgent(MultiAgentSearchAgent):
             
             # store the maximum state value and pass the next state value with
             # making the next state agent as 'Min Agent'. 
-            maxStateValue = max(maxStateValue, self.getStateValue(gameState.generateSuccessor(0, action), currentDepth, 1))
+            maxStateValue = max(maxStateValue, 
+            self.getStateValue(gameState.generateSuccessor(0, action), currentDepth, 1))
         
         return maxStateValue
+
 
     def getMinStateValue(self, gameState, currentDepth, agentIndex):
         """
@@ -283,6 +320,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         and using alpha-beta pruning. 
         """
+
         ## "*** YOUR CODE HERE ***" ##
 
         # set the max state value to be the lowest possible value, i.e. 
@@ -350,6 +388,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
         Calculate and return the Max State Value using alpha-beta pruning.
         """
+
         # set the maximum state value as -infinity initially.
         # Which will store the maximum state value.
         maxStateValue = float("-inf")
@@ -395,10 +434,12 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             # and increase the depth of the tree.  
             if agentIndex == gameState.getNumAgents() - 1:
                 minStateValue = min(minStateValue, 
-                self.getStateValue(gameState.generateSuccessor(agentIndex, action), currentDepth+1, 0, alpha, beta))
+                self.getStateValue(
+                    gameState.generateSuccessor(agentIndex, action), currentDepth + 1, 0, alpha, beta))
             else:
                 minStateValue = min(minStateValue, 
-                self.getStateValue(gameState.generateSuccessor(agentIndex, action), currentDepth, agentIndex+1, alpha, beta))
+                self.getStateValue(
+                    gameState.generateSuccessor(agentIndex, action), currentDepth, agentIndex + 1, alpha, beta))
             
             # Check if the min state value is less then alpha then no need to
             # check further actions and return the min state value, in this way 
@@ -425,6 +466,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         All ghosts should be modeled as choosing uniformly at random from their
         legal moves.
         """
+
         ## "*** YOUR CODE HERE ***" ##
 
         # set the max state value to be the lowest possible value, i.e. 
@@ -455,10 +497,12 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 
         util.raiseNotDefined()
 
+
     def getStateValue(self, gameState, currentDepth, agentIndex):
         """
         Returns the state value.
         """
+
         # Check for the terminal state. if this is the terminal state then
         # return the evaluation value of that state.
         if currentDepth == self.depth or gameState.isWin() or gameState.isLose():
@@ -472,7 +516,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         # If this state action is to be taken from the 'Min Agent'. 
         # Then calculate and return the Min State value. 
         else:
-            return self.getAvgStateValue(gameState,currentDepth,agentIndex)
+            return self.getAvgSumStateValue(gameState,currentDepth,agentIndex)
 
 
     def getMaxStateValue(self, gameState, currentDepth):
@@ -495,7 +539,8 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         
         return maxStateValue
 
-    def getAvgStateValue(self, gameState, currentDepth, agentIndex):
+
+    def getAvgSumStateValue(self, gameState, currentDepth, agentIndex):
         """
         Calculate and return the Average State Value.
         """
@@ -503,7 +548,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         # Here we will not calculate the minimum value of the state instead,
         # we will calculate the average value of the state and store that value
         # in the avgStateValue variable.
-        avgStateValue = 0
+        avgSumStateValue = 0
 
         # iterate over all possible action and add all the state values to get 
         # the Average state value for each possible action from the current 
@@ -517,13 +562,13 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             # state then go to the next level of the state for the 'Max Agent' 
             # and increase the depth of the tree.  
             if agentIndex == gameState.getNumAgents() - 1:
-                avgStateValue = avgStateValue + self.getStateValue(
+                avgSumStateValue = avgSumStateValue + self.getStateValue(
                     gameState.generateSuccessor(agentIndex, action), currentDepth + 1, 0)
             else:
-                avgStateValue = avgStateValue + self.getStateValue(
+                avgSumStateValue = avgSumStateValue + self.getStateValue(
                     gameState.generateSuccessor(agentIndex, action), currentDepth, agentIndex + 1)
         
-        return avgStateValue
+        return avgSumStateValue
 
 
 def betterEvaluationFunction(currentGameState):
@@ -533,7 +578,84 @@ def betterEvaluationFunction(currentGameState):
 
     DESCRIPTION: <write something here so we know what you did>
     """
-    "*** YOUR CODE HERE ***"
+
+    ## "*** YOUR CODE HERE ***" ##
+
+    # Get the status of the game, i.e. whether the pacman win the game or not.
+    # if the pacman wins the game return the highest number possible, i.e.
+    # + infinity.(because the higher numbers are better state value.)
+    if currentGameState.isWin():
+        return float("inf")
+
+    # Get the status of the game, i.e. whether the pacman win the game or not.
+    # if the pacman lose the game return the lowest number possible, i.e.
+    # - infinity.(because the lower numbers are worst state value.)
+    if currentGameState.isLose():
+        return float("-inf")  
+
+    # Get the evaluation score for the current game state. `scoreEvaluationFunction`
+    # is a default evaluation function which just returns the score of the state. 
+    # The evaluation score is the same one displayed in the Pacman GUI.
+    evaluationScore = scoreEvaluationFunction(currentGameState)
+
+    # Get the Position/Coordinates of all the food pallets present in the current
+    # game state and store it in the foodPalletsPosition variable.
+    foodPalletsPosition = currentGameState.getFood()
+    
+    # Get the Position/Coordinate of pacman in the current game state and store
+    # the coordinate in the pacmanPosition variable. 
+    pacmanPosition = currentGameState.getPacmanPosition()
+
+    # Get the total count of food pallets present in the current game state.
+    totalFoodPalletLeft = currentGameState.getNumFood()
+
+    # To store the nearest and farthest ghost manhattan distance from the 
+    # pacman in nearestGhostDistance and farthestGhostDistance. Initialise
+    # nearestGhostDistance = 1000 and farthestGhostDistance = -1000. 
+    nearestGhostDistance = 1000
+    farthestGhostDistance = -1000
+    
+    # Iterate over all the ghosts(Min Agents) and calculate and update the
+    # nearestGhostDistance and farthestGhostDistance with the minimum and the
+    # maximum of the current nearestGhostDistance value and the new manhattan
+    # distance between pacman and the ghost.
+    for i in range(1, currentGameState.getNumAgents()):
+        
+        nearestGhostDistance = min(nearestGhostDistance,
+            util.manhattanDistance(currentGameState.getGhostPosition(i), pacmanPosition))
+        
+        farthestGhostDistance = max(farthestGhostDistance,
+            util.manhattanDistance(currentGameState.getGhostPosition(i), pacmanPosition))
+        
+        # If the nearestGhostDistance is less then equal to 2 then directly return
+        # the lowest possible value, i.e. - Infinity.
+        if nearestGhostDistance <= 2:
+            return float("-inf")
+
+    # To store the nearest and farthest food pallet's manhattan distance from
+    # the pacman in nearestFoodDistance and farthestFoodDistance. Initialise
+    # nearestFoodDistance = 1000 and farthestFoodDistance = -1000. 
+    nearestFoodDistance = 1000
+    farthestFoodDistance = -1000
+
+    # Iterate over all the food pallets and calculate and update the
+    # nearestFoodDistance and farthestFoodDistance with the minimum and the 
+    # maximum of the current nearestFoodDistance value and the new manhattan
+    # distance between pacman and the Food.
+    for food in list(foodPalletsPosition.asList()):
+        nearestFoodDistance = min(nearestFoodDistance, util.manhattanDistance(food, pacmanPosition))
+        farthestFoodDistance = max(farthestFoodDistance, util.manhattanDistance(food, pacmanPosition))
+
+    ## These are some of the Evaluation Functions We tried ## 
+    # return evaluationScore - 2.4 * nearestFoodDistance + nearestGhostDistance + farthestGhostDistance - farthestFoodDistance - 3 * totalFoodPalletLeft
+    # return evaluationScore - 1.5 * nearestFoodDistance + 2 * nearestGhostDistance + farthestGhostDistance - 0.8 * farthestFoodDistance - 6 * totalFoodPalletLeft
+    # return evaluationScore - 2.1 * nearestFoodDistance + nearestGhostDistance + farthestGhostDistance - farthestFoodDistance - 4 * totalFoodPalletLeft
+    # return evaluationScore - 2 * nearestFoodDistance + nearestGhostDistance + 0.75 * farthestGhostDistance - farthestFoodDistance - 7.5 * totalFoodPalletLeft
+    # return evaluationScore - 1.8 * nearestFoodDistance + nearestGhostDistance + farthestGhostDistance - 0.9 * farthestFoodDistance - 6 * totalFoodPalletLeft
+    # return evaluationScore - 2 * nearestFoodDistance + 1.1 * nearestGhostDistance + 0.8 * farthestGhostDistance - farthestFoodDistance - 7 * totalFoodPalletLeft
+    ## Finally We get the reasonable good performance using this Evaluation Function! ##
+    return evaluationScore - 2 * nearestFoodDistance + nearestGhostDistance + farthestGhostDistance - farthestFoodDistance - 7.8 * totalFoodPalletLeft
+
     util.raiseNotDefined()
 
 # Abbreviation
