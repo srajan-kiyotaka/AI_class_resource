@@ -77,7 +77,11 @@ def question3e():
 def question8():
     answerEpsilon = None
     answerLearningRate = None
-    return answerEpsilon, answerLearningRate
+    # return answerEpsilon, answerLearningRate
+    # it is not possible to select an epsilon and a learning rate for which
+    # it is highly likely (greater than 99%) that the optimal policy will be
+    # learned after 50 iteration
+    return "NOT POSSIBLE"
     # If not possible, return 'NOT POSSIBLE'
 
 if __name__ == '__main__':

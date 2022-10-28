@@ -15,7 +15,7 @@
 ##############################################
 ##                   Lab 2                  ##
 ##                                          ##
-##    Secondary Authors: Team               ##
+##    Secondary Authors: Team 2             ##
 ##                                          ##
 ##    Member 1:                             ##
 ##       Name: Srajan chourasia             ##
