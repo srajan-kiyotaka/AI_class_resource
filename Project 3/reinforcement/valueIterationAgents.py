@@ -133,13 +133,13 @@ class ValueIterationAgent(ValueEstimationAgent):
             return None
 
         # get the action value.
-        valuesForActions = util.Counter()
+        actionValue = util.Counter()
 
         # Iterate over all the action possible for the state.
         for action in self.mdp.getPossibleActions(state):
-            valuesForActions[action] = self.computeQValueFromValues(state, action)
+            actionValue[action] = self.computeQValueFromValues(state, action)
 
-        return valuesForActions.argMax()
+        return actionValue.argMax()
 
         util.raiseNotDefined()
 
@@ -221,7 +221,7 @@ class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
 
     def runValueIteration(self):
         # "*** YOUR CODE HERE ***" #
-
+        
         predecessors = {}
         for state in self.mdp.getStates():
             if not self.mdp.isTerminal(state):
